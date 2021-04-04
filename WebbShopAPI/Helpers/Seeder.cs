@@ -8,7 +8,7 @@ using WebbShopAPI.Models;
 
 namespace WebbShopAPI.Helpers
 {
-    class Seeder
+    public class Seeder
     {
         public void AddData()
         {

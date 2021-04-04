@@ -9,14 +9,8 @@ namespace WebbShopAPI
     {
         static void Main(string[] args)
         {
-            using (var db = new WScontext())
-            {
-                var test = new TestDemo();
-
-                test.Demo();
-
-            }
-
+            var seed = new Seeder();
+            seed.AddData();
         }
     }
 }

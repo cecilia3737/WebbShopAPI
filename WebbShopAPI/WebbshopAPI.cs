@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using WebbShopAPI.Database;
 using WebbShopAPI.Helpers;
@@ -9,7 +10,7 @@ using WebbShopAPI.Models;
 
 namespace WebbShopAPI
 {
-    class WebbshopAPI
+    public class WebbshopAPI
     {
         /// <summary>
         /// Method to login user.
@@ -47,7 +48,6 @@ namespace WebbShopAPI
         {
             using (var db = new WScontext())
             {
-                var hm = new HelperMethods();
                 var user = db.Users.
                     FirstOrDefault(
                     c => c.Id == userID
@@ -121,7 +121,7 @@ namespace WebbShopAPI
                 {
                     foreach (var book in category)
                     {
-                        Console.WriteLine($"{book.Title}");
+                        Console.WriteLine($"{book.Id}.{book.Title}");
                     }
                 }
             }
@@ -146,7 +146,7 @@ namespace WebbShopAPI
                 {
                     foreach (var book in category)
                     {
-                        Console.WriteLine($"{book.Title}");
+                        Console.WriteLine($"{book.Id}.{book.Title}");
                     }
                 }
             }
@@ -191,11 +191,37 @@ namespace WebbShopAPI
 
                 if (books != null)
                 {
-                    foreach (var book in books)
+                    foreach (var info in books)
                     {
-                        Console.WriteLine($"{book.Title}");
+                        Console.WriteLine($"{info.Title}");
                     }
-                }                
+                }
+                
+            }
+        }
+
+        /// <summary>
+        /// Method to return the first books ID where booktitle contains keyword.
+        /// </summary>
+        public int GetBookId(string keyword)
+        {
+            using (var db = new WScontext())
+            {
+                var books = db.Books.
+                    Where(
+                    b => b.Title.Contains(keyword)).
+                    FirstOrDefault(
+                    );
+
+                if (books != null)
+                {
+                    return books.Id;
+                }
+                else
+                {
+                    Console.WriteLine("Tyvärr ingen träff");
+                    return 0;
+                }
             }
         }
 
@@ -361,7 +387,7 @@ namespace WebbShopAPI
         /// <summary>
         /// Admin-Method, sets bookamount.
         /// </summary>
-        public void SetAmount(int adminID, int bookID, int amount)
+        public bool SetAmount(int adminID, int bookID, int amount)
         {
             using (var db = new WScontext())
             {
@@ -377,7 +403,10 @@ namespace WebbShopAPI
                     book.Amount = amount;
                     db.Books.Update(book);
                     db.SaveChanges();
+                    return true;
                 }
+
+                return false;
             }
         }
 
@@ -649,8 +678,51 @@ namespace WebbShopAPI
                     };
                     db.Users.Add(user);
                     db.SaveChanges();
+                    return true;
                 }
                 return false;
+            }
+        }
+
+        public int CheckUser(int userID)
+        {
+            using (var db = new WScontext())
+            {
+                var hm = new HelperMethods();
+
+                var user = db.Users.
+                    FirstOrDefault(
+                    u => u.Id == userID
+                    );
+
+                hm.SessionCheck(userID);
+
+                if (user != null && user.IsActive)
+                {
+                    return user.Id;
+                }
+
+                else { return 0; }
+            }
+        }
+
+        public int GetAdminID(int userID)
+        {
+            using (var db = new WScontext())
+            {
+                var hm = new HelperMethods();
+
+                var user = db.Users.
+                    FirstOrDefault(
+                    u => u.Id == userID && u.IsAdmin == true
+                    );
+
+                if (user != null)
+                {
+                    return user.Id;
+                }
+
+                else { return 0; }
             }
         }
     }
